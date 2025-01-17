@@ -19,7 +19,6 @@ def create_quiz():
             "question": data["question"],
             "answers": answers  # Add the deserialized answers to the question
         }
-        print(question_data)
         new_quiz_question = quiz_question_schema.load(question_data)
         new_quiz_question.quiz_id = quiz.id
         db.session.add(new_quiz_question)
@@ -75,34 +74,60 @@ def get_quiz(id):
 
 
 # update a quiz
-@quiz_question_bp.route("/<id>/", methods=["PUT"])
-def update_quiz(id):
+@quiz_question_bp.route("/<question_id>", methods=["PUT"])
+def update_quiz_question(question_id):
     try:
-        quiz = Quiz.query.filter_by(id=id).first()
-        if quiz:
-            data = request.get_json()
-            quiz.name = data["name"]
-            quiz.email = data["email"]
-            db.session.commit()
-            return make_response(jsonify({"message": "quiz updated"}), 200)
-        return jsonify(make_response(jsonify({"message": "quiz not found"})), 404)
+    #    data = request.get_json()
+    #    answers = data.get("answers", [])
+    #    quiz_name = data.get("quizName")
+    #    quiz_question = QuizQuestion.query.get_or_404(question_id)
+    #    quiz_question_schema = QuizQuestionSerializer(partial=True)
+    #    updated_data = quiz_question_schema.load(data, instance=quiz_question, partial=True)
+    #    question_data = {
+    #     "question": data["question"],
+    #     "answers": answers  # Add the deserialized answers to the question
+    #    }
+    #    db.session.commit()
+    #    result = quiz_question_schema.dump(updated_data)
+
+       
+        data = request.get_json()
+        quiz_question_schema = QuizQuestionSerializer()
+        answers = data.get("answers", [])
+        quiz_name = data.get("quizName")
+        quiz = Quiz.query.filter(Quiz.name.ilike(quiz_name)).first_or_404()
+        question_data = {
+            "question": data["question"],
+            "answers": answers
+        }
+        new_quiz_question = quiz_question_schema.load(question_data)
+        db.session.add(new_quiz_question)
+        db.session.commit()
+        return jsonify({}), 204
+
+    except ValidationError as e:
+        # Handle validation errors
+        return make_response(jsonify({"message": "Validation error", "errors": e.messages}), 400)
+
     except Exception as e:
+        # Handle other exceptions
         return make_response(
-            jsonify({"message": "Error updating quiz", "error": str(e)}), 500
+            jsonify({"message": "Error updating quiz question", "error": str(e)}), 500
         )
 
 
+
 # delete a quiz
-@quiz_question_bp.route("/<id>/", methods=["DELETE"])
+@quiz_question_bp.route("/<id>", methods=["DELETE"])
 def delete_quiz(id):
     try:
-        quiz = Quiz.query.filter_by(id=id).first()
-        if quiz:
-            db.session.delete(quiz)
+        quiz_question = QuizQuestion.query.filter_by(id=id).first()
+        if quiz_question:
+            db.session.delete(quiz_question)
             db.session.commit()
-            return make_response(jsonify({"message": "quiz deleted"}), 200)
-        return jsonify(make_response(jsonify({"message": "quiz not found"})), 404)
+            return make_response(jsonify({"message": "quiz question deleted"}), 200)
+        return jsonify(make_response(jsonify({"message": "quiz question not found"})), 404)
     except Exception as e:
         return make_response(
-            jsonify({"message": "Error deleting quiz", "error": str(e)}), 500
+            jsonify({"message": "Error deleting quiz question", "error": str(e)}), 500
         )
