@@ -3,3 +3,7 @@ psycopg2-binary
 Flask-SQLAlchemy
 Flask-CORS
 marshmallow
+python-dotenv
+coolname
+pyjwt
+pyjwt[crypto]

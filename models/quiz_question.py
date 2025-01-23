@@ -12,7 +12,7 @@ class QuizQuestion(db.Model):
     quiz_id = db.Column(UUID(as_uuid=True), db.ForeignKey('quiz.id'), nullable=False)
 
     # Relationship: A question has many answers
-    answers = db.relationship('QuizAnswer', back_populates='question', cascade="all, delete", lazy=True)
+    answers = db.relationship('QuizAnswer', back_populates='question', cascade="all, delete-orphan", lazy=True)
 
     # Relationship to quiz
     quiz = db.relationship('Quiz', back_populates='questions')

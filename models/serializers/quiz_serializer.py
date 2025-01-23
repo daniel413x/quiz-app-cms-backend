@@ -6,6 +6,7 @@ from models.quiz import Quiz
 class QuizSerializer(Schema):
     id = fields.UUID(required=False, allow_none=True)  # UUID will be auto-generated if not provided
     name = fields.Str(required=True)
+    slug = fields.Str(required=True)
     category_id = fields.UUID(data_key="categoryId", required=True)
     questions = fields.Nested(QuizQuestionSerializer, many=True, required=False)
 
