@@ -40,14 +40,17 @@ def create_user():
 
 
 # get a specific user
-@user_bp.route("/by-token", methods=["GET"])
-def get_user_by_auth0_id():
+@user_bp.route("/<auth0_id>", methods=["GET"])
+def get_user_by_auth0_id(auth0_id):
     try:
-        auth0_id = decode_jwt(request).get("sub")
-        user = User.query.filter_by(auth0_id=auth0_id).first()
-        if user:
-            return make_response(jsonify(user.json()), 200)
-        return jsonify(make_response(jsonify({"message": "user not found"})), 404)
+        decoded_auth0_id = decode_jwt(request).get("sub")
+        if auth0_id != decoded_auth0_id:
+            return make_response(
+                jsonify({"message": "Auth0 id mismatch"}),
+                403
+            )
+        user = User.query.filter_by(auth0_id=auth0_id).first_or_404()
+        return make_response(jsonify(user.json()), 200)
     except Exception as e:
         return make_response(
             jsonify({"message": "Error getting user", "error": str(e)}), 500

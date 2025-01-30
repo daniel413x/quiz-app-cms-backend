@@ -5,11 +5,15 @@ from cryptography.x509 import load_pem_x509_certificate
 
 
 def decode_jwt(req):
+    """return a decoded JWT
+
+    Auth0 uses the asymmetric RS256, so the public key is being handled in this function
+    """
     issuer = os.getenv("AUTH0_DOMAIN")
     audience = os.getenv("AUTH0_AUDIENCE")
     cert = os.getenv("AUTH0_CERT").encode("utf-8")
     cert = cert.replace(b"\\n", b"\n")
-    # Extract the public key from the certificate
+    # extract the public key from the certificate
     cert_obj = load_pem_x509_certificate(cert, default_backend())
     public_key = cert_obj.public_key()
     token = req.headers.get("Authorization", "").split("Bearer ")[-1]

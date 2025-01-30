@@ -34,7 +34,6 @@ def create_quiz_question():
     except ValidationError as e:
         # Handle validation errors
         return make_response(jsonify({"message": "Validation error", "errors": e.messages}), 400)
-
     except Exception as e:
         # Handle other exceptions
         return make_response(
@@ -89,7 +88,7 @@ def update_quiz_question(question_id):
         quiz_question = QuizQuestion.query.get_or_404(question_id)
         if quiz_question.domain.id != user.domain.id:
             return make_response(
-                jsonify({"message": "Domain mismatch"}),
+                jsonify({"message": "Domain does not belong to the sub"}),
                 403
             )
         data = request.get_json()

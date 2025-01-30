@@ -27,7 +27,7 @@ def create_quiz():
                 jsonify({"message": "Slug must be unique"}), 400
             )
         category_slug = data["categorySlug"]
-        category = QuizCategory.query.first_or_404(category_slug)
+        category = QuizCategory.query.filter_by(slug=category_slug).first_or_404()
         new_quiz = Quiz(name=data["name"], category_id=category.id, slug=quiz_slug)
         db.session.add(new_quiz)
         db.session.commit()
