@@ -18,7 +18,8 @@ def create_user():
         data = request.get_json()
         existing_user = User.query.filter_by(auth0_id=data["auth0Id"]).first()
         if existing_user:
-            return make_response(jsonify({}))
+            domain = Domain.query.filter_by(user_id=existing_user.id).first()
+            return make_response(jsonify({ "user": existing_user.json(), "domain": domain.json() }), 200)
         user_uuid = uuid.uuid4()
         user = User(email=data["email"], auth0_id=data["auth0Id"], id=user_uuid)
         db.session.add(user)
@@ -28,11 +29,10 @@ def create_user():
         domain.name = ' '.join(domain_name).capitalize()
         domain.slug = domain_slug
         domain.invited_users = [user_uuid]
-
         domain.user_id = user_uuid  # Set the user's ID in the domain
         user.domain = domain
         db.session.commit()
-        return jsonify(user.json())
+        return make_response(jsonify({ "user": user.json(), "domain": domain.json() }), 201)
     except Exception as e:
         return make_response(
             jsonify({"message": "Error creating user", "error": str(e)}), 500
